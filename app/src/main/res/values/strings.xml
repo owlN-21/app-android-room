@@ -26,6 +26,9 @@
     <string name="item_entry_title">Add Item</string>
     <string name="item_name_req">Item Name*</string>
     <string name="item_price_req">Item Price*</string>
+    <string name="item_name_supp_req">Name Supplier*</string>
+    <string name="item_email_supp_req">Email Supplier*</string>
+    <string name="item_phone_supp_req">Phone Supplier*</string>
     <string name="no">No</string>
     <string name="price">Price</string>
     <string name="quantity_in_stock">Quantity in stock</string>
@@ -35,6 +38,7 @@
     <string name="sell">Sell</string>
     <string name="yes">Yes</string>
     <string name="required_fields">*required fields</string>
-    <string name="name_supplier">NameSupplier</string>
-
+    <string name="name_supplier">Name Supplier</string>
+    <string name="email_supplier">Email Supplier</string>
+    <string name="phone_supplier">Phone Supplier</string>
 </resources>

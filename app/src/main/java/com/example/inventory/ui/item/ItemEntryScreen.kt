@@ -25,8 +25,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Email
+import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -176,13 +180,42 @@ fun ItemInputForm(
         )
         OutlinedTextField(
             value = itemDetails.nameSupplier,
-            onValueChange = { onValueChange(itemDetails.copy(name = it)) },
-            label = { Text(stringResource(R.string.item_name_req)) },
+            onValueChange = { onValueChange(itemDetails.copy(nameSupplier = it)) },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
+            label = { Text(stringResource(R.string.item_name_supp_req)) },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
                 unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
                 disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
             ),
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = itemDetails.emailSupplier,
+            onValueChange = { onValueChange(itemDetails.copy(emailSupplier = it)) },
+            label = { Text(stringResource(R.string.item_email_supp_req)) },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            ),
+            leadingIcon = { Icon(imageVector = Icons.Outlined.Email, contentDescription = null) },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled,
+            singleLine = true
+        )
+        OutlinedTextField(
+            value = itemDetails.phoneSupplier,
+            onValueChange = { onValueChange(itemDetails.copy(phoneSupplier = it)) },
+            label = { Text(stringResource(R.string.item_phone_supp_req)) },
+            colors = OutlinedTextFieldDefaults.colors(
+                focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                disabledContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            ),
+            leadingIcon = { Icon(imageVector = Icons.Outlined.Phone, contentDescription = null) },
             modifier = Modifier.fillMaxWidth(),
             enabled = enabled,
             singleLine = true

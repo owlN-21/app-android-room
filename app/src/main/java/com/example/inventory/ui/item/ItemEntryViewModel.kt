@@ -70,9 +70,9 @@ data class ItemDetails(
     val name: String = "",
     val price: String = "",
     val quantity: String = "",
-    val nameSupplier: String = " ",
-    val emailSupplier: String = " ",
-    val phoneSupplier: String = " ",
+    val nameSupplier: String = "",
+    val emailSupplier: String = "",
+    val phoneSupplier: String = "",
 )
 
 /**
