@@ -29,5 +29,8 @@ data class Item(
     val id: Int = 0,
     val name: String,
     val price: Double,
-    val quantity: Int
+    val quantity: Int,
+    val nameSupplier: String,
+    val emailSupplier: String,
+    val phoneSupplier: String
 )

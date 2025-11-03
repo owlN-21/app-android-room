@@ -35,4 +35,6 @@
     <string name="sell">Sell</string>
     <string name="yes">Yes</string>
     <string name="required_fields">*required fields</string>
+    <string name="name_supplier">NameSupplier</string>
+
 </resources>
