@@ -22,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import com.example.inventory.data.Item
 import com.example.inventory.data.ItemsRepository
+import com.example.inventory.ui.validation.Validators
 import java.text.NumberFormat
 
 /**
@@ -46,7 +47,10 @@ class ItemEntryViewModel(private val itemsRepository: ItemsRepository) : ViewMod
 
     private fun validateInput(uiState: ItemDetails = itemUiState.itemDetails): Boolean {
         return with(uiState) {
-            name.isNotBlank() && price.isNotBlank() && quantity.isNotBlank()
+            val suppNameOk = Validators.nameErrorOrNull(nameSupplier) == null
+            val emailOk    = Validators.emailErrorOrNull(emailSupplier) == null
+            val phoneOk    = Validators.phoneErrorOrNull(phoneSupplier) == null
+            name.isNotBlank() && price.isNotBlank() && quantity.isNotBlank() && suppNameOk && emailOk && phoneOk
         }
     }
 

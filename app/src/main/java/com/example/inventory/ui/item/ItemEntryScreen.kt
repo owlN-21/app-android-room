@@ -50,9 +50,11 @@ import com.example.inventory.R
 import com.example.inventory.ui.AppViewModelProvider
 import com.example.inventory.ui.navigation.NavigationDestination
 import com.example.inventory.ui.theme.InventoryTheme
+import com.example.inventory.ui.validation.Validators
 import kotlinx.coroutines.launch
 import java.util.Currency
 import java.util.Locale
+import javax.xml.validation.Validator
 
 object ItemEntryDestination : NavigationDestination {
     override val route = "item_entry"
@@ -181,7 +183,10 @@ fun ItemInputForm(
         OutlinedTextField(
             value = itemDetails.nameSupplier,
             onValueChange = { onValueChange(itemDetails.copy(nameSupplier = it)) },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
+            isError = Validators.nameErrorOrNull(itemDetails.nameSupplier) != null,
+            supportingText = {
+                Validators.nameErrorOrNull(itemDetails.nameSupplier)?.let { Text(it) }
+            },
             label = { Text(stringResource(R.string.item_name_supp_req)) },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -196,6 +201,10 @@ fun ItemInputForm(
             value = itemDetails.emailSupplier,
             onValueChange = { onValueChange(itemDetails.copy(emailSupplier = it)) },
             label = { Text(stringResource(R.string.item_email_supp_req)) },
+            isError = Validators.emailErrorOrNull(itemDetails.emailSupplier) != null,
+            supportingText = {
+                Validators.emailErrorOrNull(itemDetails.emailSupplier)?.let { Text(it) }
+            },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
                 unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -210,6 +219,10 @@ fun ItemInputForm(
             value = itemDetails.phoneSupplier,
             onValueChange = { onValueChange(itemDetails.copy(phoneSupplier = it)) },
             label = { Text(stringResource(R.string.item_phone_supp_req)) },
+            isError = Validators.phoneErrorOrNull(itemDetails.phoneSupplier)!=null,
+            supportingText = {
+                Validators.phoneErrorOrNull(itemDetails.phoneSupplier)?.let { Text(it) }
+            },
             colors = OutlinedTextFieldDefaults.colors(
                 focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
                 unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
