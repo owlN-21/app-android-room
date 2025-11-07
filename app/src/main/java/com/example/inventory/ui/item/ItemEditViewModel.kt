@@ -24,6 +24,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.inventory.data.ItemsRepository
+import com.example.inventory.ui.validation.Validators
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -68,7 +69,10 @@ class ItemEditViewModel(
 
     private fun validateInput(uiState: ItemDetails = itemUiState.itemDetails): Boolean {
         return with(uiState) {
-            name.isNotBlank() && price.isNotBlank() && quantity.isNotBlank()
+            val suppNameOk = Validators.nameErrorOrNull(nameSupplier) == null
+            val emailOk    = Validators.emailErrorOrNull(emailSupplier) == null
+            val phoneOk    = Validators.phoneErrorOrNull(phoneSupplier) == null
+            name.isNotBlank() && price.isNotBlank() && quantity.isNotBlank() && suppNameOk && emailOk && phoneOk
         }
     }
 }

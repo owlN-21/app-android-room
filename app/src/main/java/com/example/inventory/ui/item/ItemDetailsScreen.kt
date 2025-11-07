@@ -16,6 +16,7 @@
 
 package com.example.inventory.ui.item
 
+import android.content.Intent
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -49,11 +50,13 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.inventory.InventoryTopAppBar
 import com.example.inventory.R
@@ -129,6 +132,7 @@ private fun ItemDetailsBody(
     onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     Column(
         modifier = modifier.padding(dimensionResource(id = R.dimen.padding_medium)),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
@@ -147,6 +151,26 @@ private fun ItemDetailsBody(
         ) {
             Text(stringResource(R.string.sell))
         }
+
+        OutlinedButton(
+            onClick = {
+                val shareText = buildShareText(itemDetailsUiState)
+                val sendIntent: Intent = Intent().apply {
+                    action = Intent.ACTION_SEND
+                    putExtra(Intent.EXTRA_TEXT, shareText)
+                    type = "text/plain"
+                }
+
+                val shareIntent = Intent.createChooser(sendIntent, null)
+                context.startActivity(shareIntent)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.small,
+        ) {
+            Text(text = stringResource(R.string.share))
+        }
+
+
         OutlinedButton(
             onClick = { deleteConfirmationRequired = true },
             shape = MaterialTheme.shapes.small,
@@ -166,6 +190,34 @@ private fun ItemDetailsBody(
         }
     }
 }
+
+private fun buildShareText(itemDetailsUiState: ItemDetailsUiState) : String{
+    val item = itemDetailsUiState.itemDetails.toItem()
+    return buildString {
+        appendLine("Item: ${item.name}")
+        appendLine("Price: ${item.price}")
+        appendLine("In stock: ${item.quantity}")
+        appendLine()
+        appendLine("Supplier:")
+        appendLine("  Name: ${item.nameSupplier}")
+        appendLine("  Email: ${item.emailSupplier}")
+        appendLine("  Phone: ${item.phoneSupplier}")
+    }
+}
+
+
+//private fun shareItem(shareItem :String){
+//    val sendIntent: Intent = Intent().apply {
+//        action = Intent.ACTION_SEND
+//        putExtra(Intent.EXTRA_TEXT, shareItem)
+//        type = "text/plain"
+//    }
+//
+//    val shareIntent = Intent.createChooser(sendIntent, null)
+//    LocalContext.current.startActivity(shareIntent)
+//}
+
+
 
 @Composable
 fun ItemDetails(
