@@ -36,6 +36,12 @@ class ItemEditViewModel(
     savedStateHandle: SavedStateHandle,
     private val itemsRepository: ItemsRepository
 ) : ViewModel() {
+    private val itemId: Int = checkNotNull(savedStateHandle[ItemEditDestination.itemIdArg])
+
+    var itemUiState by mutableStateOf(ItemUiState())
+        private set
+
+
 
     init {
         viewModelScope.launch {
@@ -62,10 +68,6 @@ class ItemEditViewModel(
     /**
      * Holds current item ui state
      */
-    var itemUiState by mutableStateOf(ItemUiState())
-        private set
-
-    private val itemId: Int = checkNotNull(savedStateHandle[ItemEditDestination.itemIdArg])
 
     private fun validateInput(uiState: ItemDetails = itemUiState.itemDetails): Boolean {
         return with(uiState) {
