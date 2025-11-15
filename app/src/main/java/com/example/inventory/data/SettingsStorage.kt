@@ -28,4 +28,14 @@ class SettingsStorage(context: Context) {
         return prefs.getBoolean("hide_sensitive_data", false)
     }
 
+    fun setSendingDataDisabled(value: Boolean){
+        prefs.edit { putBoolean("key_disable_sending", value) }
+    }
+
+    fun isSendingDataDisabled(): Boolean{
+        return prefs.getBoolean("key_disable_sending", false)
+    }
+
+
+
 }

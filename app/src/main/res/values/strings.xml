@@ -42,4 +42,6 @@
     <string name="name_supplier">Name Supplier</string>
     <string name="email_supplier">Email Supplier</string>
     <string name="phone_supplier">Phone Supplier</string>
+    <string name="disable_sending_data">Запретить отправку данных из приложения</string>
+    <string name="share_disabled_by_settings">Отправка данных запрещена настройками приложения</string>
 </resources>

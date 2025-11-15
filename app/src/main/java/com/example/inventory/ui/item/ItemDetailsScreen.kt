@@ -145,6 +145,8 @@ private fun ItemDetailsBody(
     val settings = remember { SettingsStorage(context) }
     var hideSensitive by remember { mutableStateOf(settings.isHideSensitiveDataEnabled()) }
 
+    var isSendingDataDisabled by remember { mutableStateOf(settings.isSendingDataDisabled()) }
+
     Column(
         modifier = modifier.padding(dimensionResource(id = R.dimen.padding_medium)),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
@@ -171,6 +173,10 @@ private fun ItemDetailsBody(
 
         OutlinedButton(
             onClick = {
+
+                if (isSendingDataDisabled) return@OutlinedButton
+
+
                 val shareText = buildShareText(itemDetailsUiState)
                 val sendIntent: Intent = Intent().apply {
                     action = Intent.ACTION_SEND
@@ -183,8 +189,16 @@ private fun ItemDetailsBody(
             },
             modifier = Modifier.fillMaxWidth(),
             shape = MaterialTheme.shapes.small,
+            enabled = !isSendingDataDisabled
         ) {
             Text(text = stringResource(R.string.share))
+        }
+        if (isSendingDataDisabled) {
+            Text(
+                text = stringResource(R.string.share_disabled_by_settings),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
         }
 
 
@@ -221,18 +235,6 @@ private fun buildShareText(itemDetailsUiState: ItemDetailsUiState) : String{
         appendLine("  Phone: ${item.phoneSupplier}")
     }
 }
-
-
-//private fun shareItem(shareItem :String){
-//    val sendIntent: Intent = Intent().apply {
-//        action = Intent.ACTION_SEND
-//        putExtra(Intent.EXTRA_TEXT, shareItem)
-//        type = "text/plain"
-//    }
-//
-//    val shareIntent = Intent.createChooser(sendIntent, null)
-//    LocalContext.current.startActivity(shareIntent)
-//}
 
 
 
