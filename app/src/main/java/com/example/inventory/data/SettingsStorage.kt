@@ -38,4 +38,20 @@ class SettingsStorage(context: Context) {
 
 
 
+    fun setUseDefaultQuantity(value: Boolean){
+        prefs.edit { putBoolean("use_default_quantity", value)}
+    }
+
+    fun isUseDefaultQuantity(): Boolean {
+        return prefs.getBoolean("use_default_quantity", false)
+    }
+
+    fun setDefaultQuantity(value: Int) {
+        prefs.edit { putInt("default_quantity", value) }
+    }
+
+    fun getDefaultQuantity(): Int {
+        return prefs.getInt("default_quantity", 5)
+    }
+
 }
