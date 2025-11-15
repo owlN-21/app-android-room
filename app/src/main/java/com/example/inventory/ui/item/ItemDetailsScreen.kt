@@ -19,12 +19,14 @@ package com.example.inventory.ui.item
 import android.content.Intent
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -51,13 +53,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat.startActivity
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.inventory.InventoryTopAppBar
@@ -274,23 +279,41 @@ fun ItemDetails(
                     horizontal = dimensionResource(id = R.dimen.padding_medium)
                 )
             )
-            Checkbox(
-                checked = hideSensitive,
-                onCheckedChange = onHideSensitiveChange
-            )
-            ItemDetailsRow(
-                labelResID = R.string.name_supplier,
-                itemDetail = if(hideSensitive) "*****" else item.nameSupplier,
-                modifier = Modifier.padding(
-                    horizontal = dimensionResource(id = R.dimen.padding_medium)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = dimensionResource(id = R.dimen.padding_medium))
+            ) {
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(stringResource(R.string.name_supplier))
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text(
+                        text = if (hideSensitive) "*".repeat(item.nameSupplier.length) else item.nameSupplier,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Checkbox(
+                    checked = hideSensitive,
+                    onCheckedChange = onHideSensitiveChange,
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .offset(x = (-40).dp, y = (-12).dp)
+                        .scale(0.7f)
                 )
-            )
+            }
+
             ItemDetailsRow(
                 labelResID = R.string.email_supplier,
                 itemDetail = item.emailSupplier,
                 modifier = Modifier.padding(
                     horizontal = dimensionResource(id = R.dimen.padding_medium)
                 )
+                    .offset(y = (-23).dp)
             )
             ItemDetailsRow(
                 labelResID = R.string.phone_supplier,
@@ -298,6 +321,7 @@ fun ItemDetails(
                 modifier = Modifier.padding(
                     horizontal = dimensionResource(id = R.dimen.padding_medium)
                 )
+                    .offset(y = (-23).dp)
             )
         }
     }
