@@ -34,6 +34,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -46,6 +47,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -61,6 +63,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.inventory.InventoryTopAppBar
 import com.example.inventory.R
 import com.example.inventory.data.Item
+import com.example.inventory.data.SettingsStorage
 import com.example.inventory.ui.AppViewModelProvider
 import com.example.inventory.ui.home.HomeViewModel
 import com.example.inventory.ui.navigation.NavigationDestination
@@ -133,6 +136,10 @@ private fun ItemDetailsBody(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+
+    val settings = remember { SettingsStorage(context) }
+    var hideSensitive by remember { mutableStateOf(settings.isHideSensitiveDataEnabled()) }
+
     Column(
         modifier = modifier.padding(dimensionResource(id = R.dimen.padding_medium)),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
@@ -141,6 +148,11 @@ private fun ItemDetailsBody(
 
         ItemDetails(
             item = itemDetailsUiState.itemDetails.toItem(),
+            hideSensitive = hideSensitive,
+            onHideSensitiveChange = { checked ->
+                hideSensitive = checked                  // обновляем UI
+                settings.setHideSensitiveData(checked)   // сохраняем в EncryptedSharedPreferences
+            },
             modifier = Modifier.fillMaxWidth()
         )
         Button(
@@ -221,7 +233,10 @@ private fun buildShareText(itemDetailsUiState: ItemDetailsUiState) : String{
 
 @Composable
 fun ItemDetails(
-    item: Item, modifier: Modifier = Modifier
+    item: Item,
+    hideSensitive: Boolean,
+    onHideSensitiveChange: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier,
@@ -259,9 +274,13 @@ fun ItemDetails(
                     horizontal = dimensionResource(id = R.dimen.padding_medium)
                 )
             )
+            Checkbox(
+                checked = hideSensitive,
+                onCheckedChange = onHideSensitiveChange
+            )
             ItemDetailsRow(
                 labelResID = R.string.name_supplier,
-                itemDetail = item.nameSupplier,
+                itemDetail = if(hideSensitive) "*****" else item.nameSupplier,
                 modifier = Modifier.padding(
                     horizontal = dimensionResource(id = R.dimen.padding_medium)
                 )
