@@ -16,6 +16,7 @@
 
 package com.example.inventory.data
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
@@ -32,5 +33,7 @@ data class Item(
     val quantity: Int,
     val nameSupplier: String,
     val emailSupplier: String,
-    val phoneSupplier: String
+    val phoneSupplier: String,
+    @ColumnInfo(name = "creation_type", defaultValue = "manual")
+    val creationType: String = "manual"
 )

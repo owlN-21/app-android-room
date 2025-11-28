@@ -77,6 +77,7 @@ data class ItemDetails(
     val nameSupplier: String = "",
     val emailSupplier: String = "",
     val phoneSupplier: String = "",
+    val creationType: String = "manual"
 )
 
 /**
@@ -91,7 +92,8 @@ fun ItemDetails.toItem(): Item = Item(
     quantity = quantity.toIntOrNull() ?: 0,
     nameSupplier = nameSupplier,
     emailSupplier = emailSupplier,
-    phoneSupplier = phoneSupplier
+    phoneSupplier = phoneSupplier,
+    creationType = creationType
 )
 
 fun Item.formatedPrice(): String {
@@ -116,5 +118,6 @@ fun Item.toItemDetails(): ItemDetails = ItemDetails(
     quantity = quantity.toString(),
     nameSupplier = nameSupplier,
     emailSupplier = emailSupplier,
-    phoneSupplier = phoneSupplier
+    phoneSupplier = phoneSupplier,
+    creationType = creationType
 )

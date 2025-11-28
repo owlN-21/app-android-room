@@ -22,15 +22,52 @@ import com.example.inventory.data.Item
 import com.example.inventory.data.ItemsRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * ViewModel to retrieve all items in the Room database.
  */
-class HomeViewModel(itemsRepository: ItemsRepository) : ViewModel() {
+class HomeViewModel(private val itemsRepository: ItemsRepository) : ViewModel() {
     companion object {
         private const val TIMEOUT_MILLIS = 5_000L
+    }
+    init{
+        viewModelScope.launch{
+            val currentItems = itemsRepository.getAllItemsStream().first()
+            if(currentItems.isEmpty()){
+                insertFileDemoItems()
+            }
+        }
+    }
+
+    private suspend fun insertFileDemoItems(){
+        val demoItems = listOf(
+            Item(
+                name = "Imported TV",
+                price = 499.99,
+                quantity = 5,
+                nameSupplier = "File Supplier 1",
+                emailSupplier = "file1@supplier.com",
+                phoneSupplier = "89990001122",
+                creationType = "file"
+            ),
+            Item(
+                name = "Imported Phone",
+                price = 299.99,
+                quantity = 15,
+                nameSupplier = "File Supplier 2",
+                emailSupplier = "file2@supplier.com",
+                phoneSupplier = "89990003344",
+                creationType = "file"
+            )
+        )
+
+        demoItems.forEach { item ->
+            itemsRepository.insertItem(item)
+        }
     }
     val homeUiState: StateFlow<HomeUiState> =
         itemsRepository.getAllItemsStream().map { HomeUiState(it) }
