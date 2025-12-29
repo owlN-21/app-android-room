@@ -19,6 +19,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.devtools.ksp") version "2.1.0-1.0.29"
     id("org.jetbrains.kotlin.plugin.compose")
+    id("org.jetbrains.kotlin.plugin.serialization")
 }
 
 android {
@@ -88,6 +89,9 @@ dependencies {
 
     //  EncryptedSharedPreferences
     implementation("androidx.security:security-crypto:1.1.0-alpha06")
+
+    // SerializationJson
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
 
 }

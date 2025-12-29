@@ -17,6 +17,9 @@
 package com.example.inventory.ui.item
 
 import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -74,6 +77,17 @@ import com.example.inventory.ui.home.HomeViewModel
 import com.example.inventory.ui.navigation.NavigationDestination
 import com.example.inventory.ui.theme.InventoryTheme
 import kotlinx.coroutines.launch
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import android.util.Log
+import androidx.security.crypto.EncryptedFile
+import androidx.security.crypto.MasterKey
+import java.io.File
+import javax.crypto.Cipher
+import javax.crypto.CipherOutputStream
+import javax.crypto.spec.GCMParameterSpec
+import java.security.SecureRandom
+
 
 object ItemDetailsDestination : NavigationDestination {
     override val route = "item_details"
@@ -147,6 +161,53 @@ private fun ItemDetailsBody(
 
     var isSendingDataDisabled by remember { mutableStateOf(settings.isSendingDataDisabled()) }
 
+    // SAF
+    val saveFileLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.CreateDocument("application/octet-stream")
+    ) { uri: Uri? ->
+        if (uri != null) {
+            val item = itemDetailsUiState.itemDetails.toItem()
+
+
+            val json = Json {
+                prettyPrint = true
+                encodeDefaults = true
+            }
+
+            val jsonString = json.encodeToString(item).toByteArray(Charsets.UTF_8)
+
+            // MasterKey приложения
+            val masterKey = MasterKey.Builder(context)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+
+            // временный файл во внутреннем хранилище
+            val tempFile = File(context.cacheDir, "item_${item.id}.enc")
+
+            // объект
+            val encryptedFile = EncryptedFile.Builder(
+                context,
+                tempFile,
+                masterKey,
+                EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
+            ).build()
+
+            encryptedFile.openFileOutput().use { output ->
+                output.write(jsonString)
+            }
+
+            // копируем зашифрованный файл в выбранный Uri
+            context.contentResolver.openOutputStream(uri)?.use { out ->
+                tempFile.inputStream().use { input ->
+                    input.copyTo(out)
+                }
+            }
+
+            tempFile.delete()
+
+        }
+    }
+
     Column(
         modifier = modifier.padding(dimensionResource(id = R.dimen.padding_medium)),
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_medium))
@@ -219,6 +280,17 @@ private fun ItemDetailsBody(
                 modifier = Modifier.padding(dimensionResource(id = R.dimen.padding_medium))
             )
         }
+
+        OutlinedButton(
+            onClick = {
+                saveFileLauncher.launch("item_${itemDetailsUiState.itemDetails.id}.enc")
+            },
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.small
+        ) {
+            Text(text = "Сохранить в файл")
+        }
+
     }
 }
 
