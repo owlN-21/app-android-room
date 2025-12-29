@@ -402,6 +402,18 @@ fun ItemDetails(
                 )
                     .offset(y = (-23).dp)
             )
+            ItemDetailsRow(
+                labelResID = R.string.item_source,
+                itemDetail = when (item.creationType) {
+                    "file" -> "Uploaded from a file"
+                    else -> "Manual filling in"
+                },
+                modifier = Modifier.padding(
+                    horizontal = dimensionResource(id = R.dimen.padding_medium)
+                )
+                    .offset(y = (-23).dp)
+            )
+
         }
     }
 }

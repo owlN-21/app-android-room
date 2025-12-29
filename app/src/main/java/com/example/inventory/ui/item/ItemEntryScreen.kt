@@ -125,6 +125,8 @@ fun ItemEntryScreen(
 
             val decryptedBytes = cipher.doFinal(encryptedBytes)
             val json = decryptedBytes.toString(Charsets.UTF_8)
+            viewModel.importItemFromJson(json)
+            navigateBack()
 
             Log.d("Decrypt", json)
         }

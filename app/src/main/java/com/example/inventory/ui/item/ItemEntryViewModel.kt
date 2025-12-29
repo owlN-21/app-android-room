@@ -16,13 +16,17 @@
 
 package com.example.inventory.ui.item
 
+import android.util.Log
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.inventory.data.Item
 import com.example.inventory.data.ItemsRepository
 import com.example.inventory.ui.validation.Validators
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
 import java.text.NumberFormat
 
 /**
@@ -59,6 +63,25 @@ class ItemEntryViewModel(private val itemsRepository: ItemsRepository) : ViewMod
             itemsRepository.insertItem(itemUiState.itemDetails.toItem())
         }
     }
+
+    fun importItemFromJson(json: String) {
+        viewModelScope.launch {
+            try {
+                val fromFile = Json.decodeFromString<Item>(json)
+
+                val itemForDb = fromFile.copy(
+                    id = 0,
+                    creationType = "file"
+                )
+
+                itemsRepository.insertItem(itemForDb)
+
+            } catch (e: Exception) {
+                Log.e("Import", "Ошибка импорта JSON", e)
+            }
+        }
+    }
+
 }
 
 /**
