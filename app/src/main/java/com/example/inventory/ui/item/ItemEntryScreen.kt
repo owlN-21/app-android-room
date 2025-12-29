@@ -16,6 +16,10 @@
 
 package com.example.inventory.ui.item
 
+import android.net.Uri
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,12 +32,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Create
 import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Phone
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -55,17 +61,27 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.security.crypto.EncryptedFile
+import androidx.security.crypto.MasterKey
 import com.example.inventory.InventoryTopAppBar
 import com.example.inventory.R
+import com.example.inventory.data.Item
 import com.example.inventory.data.SettingsStorage
 import com.example.inventory.ui.AppViewModelProvider
 import com.example.inventory.ui.navigation.NavigationDestination
 import com.example.inventory.ui.theme.InventoryTheme
 import com.example.inventory.ui.validation.Validators
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import java.io.File
+import java.security.KeyStore
 import java.util.Currency
 import java.util.Locale
+import javax.crypto.Cipher
+import javax.crypto.CipherInputStream
+import javax.crypto.spec.GCMParameterSpec
 import javax.xml.validation.Validator
+
 
 object ItemEntryDestination : NavigationDestination {
     override val route = "item_entry"
@@ -80,13 +96,63 @@ fun ItemEntryScreen(
     canNavigateBack: Boolean = true,
     viewModel: ItemEntryViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+    val openEncryptedFileLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: Uri? ->
+
+        if (uri == null) return@rememberLauncherForActivityResult
+
+        val ks = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+        val secretKey =
+            (ks.getEntry("ItemKey", null) as KeyStore.SecretKeyEntry).secretKey
+
+        context.contentResolver.openInputStream(uri)?.use { input ->
+
+            val ivSize = input.read()
+            val iv = ByteArray(ivSize)
+            input.read(iv)
+
+            val encryptedBytes = input.readBytes()
+
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            cipher.init(
+                Cipher.DECRYPT_MODE,
+                secretKey,
+                GCMParameterSpec(128, iv)
+            )
+
+            val decryptedBytes = cipher.doFinal(encryptedBytes)
+            val json = decryptedBytes.toString(Charsets.UTF_8)
+
+            Log.d("Decrypt", json)
+        }
+    }
+
+
+
+
     Scaffold(
         topBar = {
             InventoryTopAppBar(
                 title = stringResource(ItemEntryDestination.titleRes),
                 canNavigateBack = canNavigateBack,
-                navigateUp = onNavigateUp
+                navigateUp = onNavigateUp,
+                actions = {
+                    IconButton(
+                        onClick = {
+                            openEncryptedFileLauncher.launch(
+                                arrayOf("*/*")
+                            )
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Create,
+                            contentDescription = "Загрузить из зашифрованного файла"
+                        )
+                    }
+                }
             )
         }
     ) { innerPadding ->
@@ -110,6 +176,7 @@ fun ItemEntryScreen(
         )
     }
 }
+
 
 @Composable
 fun ItemEntryBody(

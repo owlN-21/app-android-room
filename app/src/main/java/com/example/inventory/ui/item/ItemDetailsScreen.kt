@@ -18,6 +18,8 @@ package com.example.inventory.ui.item
 
 import android.content.Intent
 import android.net.Uri
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
@@ -83,10 +85,12 @@ import android.util.Log
 import androidx.security.crypto.EncryptedFile
 import androidx.security.crypto.MasterKey
 import java.io.File
+import java.security.KeyStore
 import javax.crypto.Cipher
 import javax.crypto.CipherOutputStream
 import javax.crypto.spec.GCMParameterSpec
 import java.security.SecureRandom
+import javax.crypto.KeyGenerator
 
 
 object ItemDetailsDestination : NavigationDestination {
@@ -166,44 +170,45 @@ private fun ItemDetailsBody(
         contract = ActivityResultContracts.CreateDocument("application/octet-stream")
     ) { uri: Uri? ->
         if (uri != null) {
-            val item = itemDetailsUiState.itemDetails.toItem()
+            val ks = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
 
+            val keyAlias = "ItemKey"
 
-            val json = Json {
-                prettyPrint = true
-                encodeDefaults = true
+            if (!ks.containsAlias(keyAlias)) {
+                val keyGenerator = KeyGenerator.getInstance(
+                    KeyProperties.KEY_ALGORITHM_AES,
+                    "AndroidKeyStore"
+                )
+                val spec = KeyGenParameterSpec.Builder(
+                    keyAlias,
+                    KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
+                )
+                    .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                    .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                    .setKeySize(256)
+                    .build()
+
+                keyGenerator.init(spec)
+                keyGenerator.generateKey()
             }
 
-            val jsonString = json.encodeToString(item).toByteArray(Charsets.UTF_8)
+            val secretKey = (ks.getEntry(keyAlias, null) as KeyStore.SecretKeyEntry).secretKey
 
-            // MasterKey приложения
-            val masterKey = MasterKey.Builder(context)
-                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-                .build()
+            val json = Json.encodeToString(itemDetailsUiState.itemDetails.toItem())
+            val jsonBytes = json.toByteArray(Charsets.UTF_8)
 
-            // временный файл во внутреннем хранилище
-            val tempFile = File(context.cacheDir, "item_${item.id}.enc")
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            cipher.init(Cipher.ENCRYPT_MODE, secretKey)
 
-            // объект
-            val encryptedFile = EncryptedFile.Builder(
-                context,
-                tempFile,
-                masterKey,
-                EncryptedFile.FileEncryptionScheme.AES256_GCM_HKDF_4KB
-            ).build()
+            val iv = cipher.iv
+            val encryptedBytes = cipher.doFinal(jsonBytes)
 
-            encryptedFile.openFileOutput().use { output ->
-                output.write(jsonString)
-            }
-
-            // копируем зашифрованный файл в выбранный Uri
             context.contentResolver.openOutputStream(uri)?.use { out ->
-                tempFile.inputStream().use { input ->
-                    input.copyTo(out)
-                }
+                out.write(iv.size)
+                out.write(iv)
+                out.write(encryptedBytes)
             }
 
-            tempFile.delete()
 
         }
     }
